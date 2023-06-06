@@ -35,9 +35,11 @@ public class PostServiceImpl implements PostService{
 	@Override
 	public PostDto createPost(PostDto postDto, Integer userId, Integer categoryId) {
 		
-		User user = this.userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "user id", userId));
+		User user = this.userRepo.findById(userId)
+				.orElseThrow(() -> new ResourceNotFoundException("User", "user id", userId));
 		
-		Category category = this.categoryRepo.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category", "category id", categoryId));
+		Category category = this.categoryRepo.findById(categoryId)
+				.orElseThrow(() -> new ResourceNotFoundException("Category", "category id", categoryId));
 		
 		Post post = this.modelMapper.map(postDto, Post.class);
 		post.setImageName("default.png");
@@ -51,27 +53,42 @@ public class PostServiceImpl implements PostService{
 	}
 
 	@Override
-	public Post updatePost(PostDto postDto, Integer postId) {
-		// TODO Auto-generated method stub
-		return null;
+	public PostDto updatePost(PostDto postDto, Integer postId) {
+		
+		Post post = this.postRepo.findById(postId)
+				.orElseThrow(() -> new ResourceNotFoundException("Post", "post id", postId));
+		
+		post.setTitle(postDto.getTitle());
+		post.setContent(postDto.getContent());
+		post.setImageName(postDto.getImageName());
+		
+		Post updatedPost = this.postRepo.save(post);
+		return this.modelMapper.map(updatedPost, PostDto.class);
 	}
 
 	@Override
 	public void deletePost(Integer postId) {
-		// TODO Auto-generated method stub
+		Post post = this.postRepo.findById(postId)
+				.orElseThrow(() -> new ResourceNotFoundException("Post", "post id", postId));
+		this.postRepo.delete(post);
+	}
+
+	@Override
+	public List<PostDto> getAllPost() {
 		
+		List<Post> allposts = this.postRepo.findAll();
+		List<PostDto> postDtos = allposts.stream().map((post) -> this.modelMapper.map(post, PostDto.class))
+				.collect(Collectors.toList());
+		
+		return postDtos;
 	}
 
 	@Override
-	public List<Post> getAllPost() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Post getPostById(Integer postId) {
-		// TODO Auto-generated method stub
-		return null;
+	public PostDto getPostById(Integer postId) {
+		Post post = this.postRepo.findById(postId)
+				.orElseThrow(() -> new ResourceNotFoundException("Post", "post id", postId));
+		
+		return this.modelMapper.map(post, PostDto.class);
 	}
 
 	@Override
@@ -101,7 +118,7 @@ public class PostServiceImpl implements PostService{
 	}
 
 	@Override
-	public List<Post> searhPosts(String keyword) {
+	public List<PostDto> searhPosts(String keyword) {
 		// TODO Auto-generated method stub
 		return null;
 	}
